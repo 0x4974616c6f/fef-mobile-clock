@@ -1,7 +1,17 @@
-import 'package:fef_mobile_clock/screens/login_screen.dart';
+import 'package:fef_mobile_clock/src/providers/user_provider.dart';
+import 'package:fef_mobile_clock/src/screens/home_screen.dart';
+import 'package:fef_mobile_clock/src/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => UserProvider(),
+      child: const MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -29,7 +39,10 @@ class MyApp extends StatelessWidget {
         ),
         colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red),
       ),
-      home: const LoginPage(),
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/home': (context) => const HomeScreen()
+      },
     );
   }
 }
