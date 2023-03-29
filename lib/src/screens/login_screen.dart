@@ -75,10 +75,10 @@ class _LoginPageState extends State<LoginPage>
                   child: TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'E-mail',
                       border: OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.email),
+                      prefixIcon: Icon(Icons.email),
                     ),
                   ),
                 ),
@@ -88,10 +88,10 @@ class _LoginPageState extends State<LoginPage>
                   child: TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Senha',
                       border: OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.lock),
+                      prefixIcon: Icon(Icons.lock),
                     ),
                   ),
                 ),

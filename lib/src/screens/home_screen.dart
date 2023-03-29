@@ -10,6 +10,7 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _HomeScreenState createState() => _HomeScreenState();
 }
 
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _elapsedSeconds++;
       });
@@ -49,20 +50,23 @@ class _HomeScreenState extends State<HomeScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> timeRecords = prefs.getStringList('timeRecords') ?? [];
 
-    for (final timeRecordString in timeRecords) {
-      DateTime timeRecord = DateTime.parse(timeRecordString);
-      final userId = Provider.of<UserProvider>(context, listen: false).userId;
-      final result = await addTimeRecord(timeRecord, userId!);
+    if (timeRecords.isEmpty) {
+    } else {
+      for (final timeRecordString in timeRecords) {
+        DateTime timeRecord = DateTime.parse(timeRecordString);
+        final userId = Provider.of<UserProvider>(context, listen: false).userId;
+        final result = await addTimeRecord(timeRecord, userId!);
 
-      if (result['success']) {
-        print('Registro de ponto enviado com sucesso');
-      } else {
-        print('Erro ao enviar registro de ponto');
-        return;
+        if (result['success']) {
+          print('Registro de ponto enviado com sucesso');
+        } else {
+          print('Erro ao enviar registro de ponto');
+          return;
+        }
       }
-    }
 
-    await prefs.setStringList('timeRecords', []);
+      await prefs.setStringList('timeRecords', []);
+    }
   }
 
   Future<void> _handleTimeRecord(BuildContext context, String userId) async {
@@ -106,28 +110,42 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = Provider.of<UserProvider>(context).userId;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Home'),
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Bem-vindo(a) à tela inicial!'),
+            const SizedBox(height: 20),
+            Text(
+              'Contador: ${_formatDuration(Duration(seconds: _elapsedSeconds))}',
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _handleTimeRecord(context, userId!),
+              child: const Text('Registrar Ponto'),
+            ),
+            ElevatedButton(
+              onPressed: _stopTimer,
+              child: const Text('Parar Contador'),
+            ),
+            // Adicionando o FutureBuilder para carregar os dados da API
+            FutureBuilder(
+              future: _syncTimeRecordsWithApi(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else {
+                  // Aqui você pode adicionar o código para exibir os dados carregados
+                  return const SizedBox(height: 20);
+                }
+              },
+            ),
+          ],
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Bem-vindo(a) à tela inicial!'),
-              const SizedBox(height: 20),
-              Text(
-                  'Contador: ${_formatDuration(Duration(seconds: _elapsedSeconds))}'),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _handleTimeRecord(context, userId!),
-                child: const Text('Registrar Ponto'),
-              ),
-              ElevatedButton(
-                onPressed: _stopTimer,
-                child: const Text('Parar Contador'),
-              ),
-            ],
-          ),
-        ));
+      ),
+    );
   }
 }
