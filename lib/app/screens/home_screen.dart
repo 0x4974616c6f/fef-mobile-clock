@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:fef_mobile_clock/src/providers/user_provider.dart';
+import '../providers/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:fef_mobile_clock/src/services/time_record.dart';
+import '../services/time_record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 

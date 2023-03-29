@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:fef_mobile_clock/src/providers/user_provider.dart';
+import '../providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';

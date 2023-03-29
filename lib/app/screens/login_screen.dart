@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fef_mobile_clock/src/services/authentication.dart';
+import '../services/authentication.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
