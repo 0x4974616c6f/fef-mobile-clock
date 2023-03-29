@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fef_mobile_clock/src/components/notification_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:fef_mobile_clock/src/providers/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   int _elapsedSeconds = 0;
+
+  final _notificationController =
+      NotificationHandlerController(); // Adicione esta linha
 
   @override
   void initState() {
@@ -39,6 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _elapsedSeconds++;
       });
+
+      String formattedTime =
+          _formatDuration(Duration(seconds: _elapsedSeconds));
+      _notificationController
+          .showTimeNotification(formattedTime); // Adicione esta linha
     });
   }
 
@@ -136,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
               future: _syncTimeRecordsWithApi(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 } else {
                   // Aqui você pode adicionar o código para exibir os dados carregados
                   return const SizedBox(height: 20);
