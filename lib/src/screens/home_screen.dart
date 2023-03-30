@@ -6,9 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:fef_mobile_clock/src/services/time_record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final NotificationHandlerController notificationController;
+  const HomeScreen({Key? key, required this.notificationController})
+      : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -18,9 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   int _elapsedSeconds = 0;
-
-  final _notificationController =
-      NotificationHandlerController(); // Adicione esta linha
+  String timeId = '';
 
   @override
   void initState() {
@@ -46,23 +47,56 @@ class _HomeScreenState extends State<HomeScreen> {
 
       String formattedTime =
           _formatDuration(Duration(seconds: _elapsedSeconds));
-      _notificationController
-          .showTimeNotification(formattedTime); // Adicione esta linha
+      widget.notificationController.showTimeNotification(formattedTime);
     });
   }
 
-  void _stopTimer() {
+  void _stopTimer() async {
+    final timestamp = DateTime.now();
+
     _timer?.cancel();
+
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.none) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> timeRecords = prefs.getStringList('timeRecordsEnd') ?? [];
+      timeRecords.add(timestamp.toIso8601String());
+      await prefs.setStringList('timeRecordsEnd', timeRecords);
+    } else {
+      final userId = Provider.of<UserProvider>(context, listen: false).userId;
+      final result = await updateTimeRecord(timestamp, userId!, timeId);
+      if (result['success']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'])),
+        );
+      } else {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        List<String> timeRecords = prefs.getStringList('timeRecordsEnd') ?? [];
+        timeRecords.add(timestamp.toIso8601String());
+        await prefs.setStringList('timeRecordsEnd', timeRecords);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'])),
+        );
+      }
+    }
+    setState(() {
+      _elapsedSeconds = 0;
+    });
   }
 
   Future<void> _syncTimeRecordsWithApi() async {
+    // @ItaloCobains: Colocar o timeRecordsEnd aqui tbm.
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> timeRecords = prefs.getStringList('timeRecords') ?? [];
+    List<String> timeRecordsStart =
+        prefs.getStringList('timeRecordsStart') ?? [];
+    // List<String> timeRecordEnd = prefs.getStringList('timeRecordEnd') ?? [];
 
-    if (timeRecords.isEmpty) {
+    if (timeRecordsStart.isEmpty) {
     } else {
-      for (final timeRecordString in timeRecords) {
+      for (final timeRecordString in timeRecordsStart) {
         DateTime timeRecord = DateTime.parse(timeRecordString);
+        // ignore: use_build_context_synchronously
         final userId = Provider.of<UserProvider>(context, listen: false).userId;
         final result = await addTimeRecord(timeRecord, userId!);
 
@@ -74,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
-      await prefs.setStringList('timeRecords', []);
+      await prefs.setStringList('timeRecordsStart', []);
     }
   }
 
@@ -85,12 +119,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (connectivityResult == ConnectivityResult.none) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> timeRecords = prefs.getStringList('timeRecords') ?? [];
+      List<String> timeRecords = prefs.getStringList('timeRecordsStart') ?? [];
       timeRecords.add(timestamp.toIso8601String());
-      await prefs.setStringList('timeRecords', timeRecords);
+      await prefs.setStringList('timeRecordsStart', timeRecords);
     } else {
       final result = await addTimeRecord(timestamp, userId);
       if (result['success']) {
+        timeId = result['idTime'];
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
         );

@@ -17,7 +17,11 @@ Future<Map<String, dynamic>> addTimeRecord(
   );
 
   if (response.statusCode == 201) {
-    return {'success': true, 'message': 'Ponto registrado com sucesso'};
+    return {
+      'success': true,
+      'message': 'Ponto registrado com sucesso',
+      'idTime': jsonDecode(response.body)['timeId']
+    };
   } else {
     return {'success': false, 'message': 'Erro ao criar registro de tempo'};
   }

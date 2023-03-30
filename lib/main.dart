@@ -4,8 +4,10 @@ import 'package:fef_mobile_clock/src/screens/login_screen.dart';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() {
+  tz.initializeTimeZones();
   runApp(
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
@@ -19,9 +21,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _notificationController = NotificationHandlerController();
+    final notificationController = NotificationHandlerController();
     return NotificationHandler(
-        controller: _notificationController,
+        controller: notificationController,
         child: MaterialApp(
           title: 'MyApp',
           theme: ThemeData(
@@ -48,7 +50,9 @@ class MyApp extends StatelessWidget {
           ),
           routes: {
             '/': (context) => const LoginPage(),
-            '/home': (context) => const HomeScreen()
+            '/home': (context) => HomeScreen(
+                  notificationController: notificationController,
+                )
           },
         ));
   }

@@ -25,6 +25,10 @@ class NotificationHandlerController {
   Future<void> showTimeNotification(String timeText) async {
     _notificationHandlerState?.showTimeNotification(timeText);
   }
+
+  Future<void> cancelTimeNotification() async {
+    _notificationHandlerState?.cancelTimeNotification();
+  }
 }
 
 class _NotificationHandlerState extends State<NotificationHandler> {
@@ -41,7 +45,7 @@ class _NotificationHandlerState extends State<NotificationHandler> {
   Future<void> _configureLocalNotifications() async {
     // Configure a inicialização do plugin.
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('drawable/app_icon');
     const IOSInitializationSettings initializationSettingsIOS =
         IOSInitializationSettings();
     const InitializationSettings initializationSettings =
@@ -65,9 +69,9 @@ class _NotificationHandlerState extends State<NotificationHandler> {
   Future<void> showTimeNotification(String timeText) async {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'time_channel_id',
-      'Time Channel',
-      'Channel for showing time notifications',
+      '1',
+      'Ferrinox Clock',
+      'Ferrinox Clock',
     );
 
     const NotificationDetails notificationDetails = NotificationDetails(
@@ -75,11 +79,15 @@ class _NotificationHandlerState extends State<NotificationHandler> {
     );
 
     await _flutterLocalNotificationsPlugin.show(
-      0, // Notification ID
+      1, // Notification ID
       'Contador em execução', // Título da notificação
       'Tempo atual: $timeText', // Conteúdo da notificação
       notificationDetails,
     );
+  }
+
+  Future<void> cancelTimeNotification() async {
+    await _flutterLocalNotificationsPlugin.cancel(1);
   }
 
   @override
