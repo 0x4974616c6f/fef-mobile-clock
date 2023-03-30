@@ -1,36 +1,47 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+const String apiUrl = 'http://10.0.2.2:5050/clock/time-records';
+
 Future<Map<String, dynamic>> addTimeRecord(
-    DateTime timestamp, String userId) async {
-  final date =
-      "${timestamp.year.toString().padLeft(4, '0')}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.day.toString().padLeft(2, '0')}";
+    DateTime startTime, String userId) async {
   final response = await http.post(
-    Uri.parse('http://10.0.2.2:5050/clock/time-records'),
-    body: jsonEncode(<String, dynamic>{
-      'date': date,
+    Uri.parse('$apiUrl/init'),
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode({
+      'startTime': startTime.toIso8601String(),
       'employeeId': userId,
     }),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer your-access-token',
-    },
   );
 
   if (response.statusCode == 201) {
-    // Registro de ponto adicionado com sucesso
-    return {'success': true, 'message': 'Registro de ponto adicionado'};
+    return {
+      'success': true,
+      'message': 'Ponto registrado com sucesso',
+      'idTime': jsonDecode(response.body)['timeId']
+    };
   } else {
-    // Trate os erros ao adicionar o registro de ponto
-    String errorMessage = 'Erro ao adicionar registro de ponto.';
-    if (response.statusCode == 400) {
-      errorMessage = 'Requisição inválida.';
-    } else if (response.statusCode == 401) {
-      errorMessage = 'Usuário não autorizado.';
-    } else if (response.statusCode == 500) {
-      errorMessage = 'Erro no servidor.';
-    }
+    return {'success': false, 'message': 'Erro ao criar registro de tempo'};
+  }
+}
 
-    return {'success': false, 'message': errorMessage};
+Future<Map<String, dynamic>> updateTimeRecord(
+    DateTime endTime, String userId, String recordId) async {
+  final response = await http.put(
+    Uri.parse('$apiUrl/fineshed/$recordId'),
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode({
+      'endTime': endTime.toIso8601String(),
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    return {'success': true, 'message': 'Ponto registrado com sucesso'};
+  } else {
+    return {'success': false, 'message': 'Erro ao criar registro de tempo'};
   }
 }

@@ -51,6 +51,9 @@ dependencies:
   jwt_decoder: ^2.0.1
   shared_preferences: ^2.0.15
   shimmer: ^2.0.0
+  flutter_local_notifications: ^8.2.0
+  intl: ^0.18.0
+  timezone: ^0.8.0
 
 
 dev_dependencies:
