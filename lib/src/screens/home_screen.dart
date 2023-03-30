@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:fef_mobile_clock/src/services/time_record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:image_picker/image_picker.dart';
 
 class HomeScreen extends StatefulWidget {
   final NotificationHandlerController notificationController;
@@ -22,6 +24,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   int _elapsedSeconds = 0;
   String timeId = '';
+
+  Future<void> _takePicture() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile == null) {
+      print('Nenhuma imagem selecionada.');
+      return;
+    }
+
+    final File image = File(pickedFile.path);
+    print(image.path);
+    // Você pode usar a variável 'image' para exibir a imagem no aplicativo ou fazer upload para um servidor.
+  }
 
   @override
   void initState() {
@@ -139,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _elapsedSeconds = 0;
     });
+    _takePicture();
     _startTimer();
   }
 
