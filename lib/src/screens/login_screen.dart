@@ -5,10 +5,10 @@ class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage>
+class LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -40,6 +40,7 @@ class _LoginPageState extends State<LoginPage>
     final result = await loginUser(
         context, _emailController.text, _passwordController.text);
     if (result['success']) {
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       setState(() {

@@ -12,13 +12,15 @@ class NotificationHandler extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NotificationHandlerState createState() => _NotificationHandlerState();
+  NotificationHandlerState createState() =>
+      NotificationHandlerState(); // Atualizado aqui
 }
 
 class NotificationHandlerController {
-  _NotificationHandlerState? _notificationHandlerState;
+  NotificationHandlerState? _notificationHandlerState; // Atualizado aqui
 
-  void _bindState(_NotificationHandlerState state) {
+  void _bindState(NotificationHandlerState state) {
+    // Atualizado aqui
     _notificationHandlerState = state;
   }
 
@@ -31,7 +33,7 @@ class NotificationHandlerController {
   }
 }
 
-class _NotificationHandlerState extends State<NotificationHandler> {
+class NotificationHandlerState extends State<NotificationHandler> {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 

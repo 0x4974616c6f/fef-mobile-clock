@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
     requestLocationPermission();
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result != ConnectivityResult.none) {
-        _syncTimeRecordsWithApi();
+        _syncTimeRecordsWithApi(context);
       }
     });
   }
@@ -71,8 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
       timeRecords.add(timestamp.toIso8601String());
       await prefs.setStringList('timeRecordsEnd', timeRecords);
     } else {
+      if (!mounted) return;
       final userId = Provider.of<UserProvider>(context, listen: false).userId;
       final result = await updateTimeRecordToApi(timestamp, userId!, timeId);
+      if (!mounted) return;
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
@@ -82,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
         List<String> timeRecords = prefs.getStringList('timeRecordsEnd') ?? [];
         timeRecords.add(timestamp.toIso8601String());
         await prefs.setStringList('timeRecordsEnd', timeRecords);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
         );
@@ -92,25 +95,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _syncTimeRecordsWithApi() async {
-    // @ItaloCobains: Colocar o timeRecordsEnd aqui tbm.
+  Future<void> _syncTimeRecordsWithApi(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> timeRecordsStart =
         prefs.getStringList('timeRecordsStart') ?? [];
-    // List<String> timeRecordEnd = prefs.getStringList('timeRecordEnd') ?? [];
 
     if (timeRecordsStart.isEmpty) {
+      return;
     } else {
       for (final timeRecordString in timeRecordsStart) {
         DateTime timeRecord = DateTime.parse(timeRecordString);
-        // ignore: use_build_context_synchronously
+        if (!mounted) return;
         final userId = Provider.of<UserProvider>(context, listen: false).userId;
         final result = await addTimeRecordToApi(timeRecord, userId!);
 
         if (result['success']) {
-          print('Registro de ponto enviado com sucesso');
         } else {
-          print('Erro ao enviar registro de ponto');
           return;
         }
       }
@@ -133,10 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final result = await addTimeRecordToApi(timestamp, userId);
       if (result['success']) {
         timeId = result['idTime'];
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
         );
