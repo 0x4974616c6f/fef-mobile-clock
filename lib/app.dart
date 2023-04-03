@@ -2,9 +2,17 @@ import 'package:fef_mobile_clock/src/screens/home_screen.dart';
 import 'package:fef_mobile_clock/src/screens/login_screen.dart';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fef_mobile_clock/src/providers/user_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  Future<String> _getInitialRoute(BuildContext context) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final token = await userProvider.getAccessToken();
+    return token != null ? '/home' : '/';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +20,7 @@ class MyApp extends StatelessWidget {
     return NotificationHandler(
       controller: notificationController,
       child: MaterialApp(
-        title: 'MyApp',
+        title: 'Ferrinox Clock',
         theme: ThemeData(
           primaryColor: Colors.blue,
           fontFamily: 'Montserrat',
@@ -34,12 +42,29 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red),
         ),
         routes: {
-          '/': (context) => const LoginPage(),
+          '/': (context) =>
+              _buildInitialScreen(context, notificationController),
           '/home': (context) => HomeScreen(
                 notificationController: notificationController,
               )
         },
       ),
+    );
+  }
+
+  Widget _buildInitialScreen(BuildContext context,
+      NotificationHandlerController notificationController) {
+    return FutureBuilder(
+      future: _getInitialRoute(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else {
+          return snapshot.data == '/home'
+              ? HomeScreen(notificationController: notificationController)
+              : const LoginPage();
+        }
+      },
     );
   }
 }
