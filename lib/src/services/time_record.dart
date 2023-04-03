@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 const String apiUrl = 'http://10.0.2.2:5050/clock/time-records';
 
 Future<Map<String, dynamic>> addTimeRecordToApi(
-    DateTime startTime, String userId) async {
+    DateTime startTime, String accessToken) async {
   final response = await http.post(
     Uri.parse('$apiUrl/init'),
     headers: {
@@ -12,7 +12,7 @@ Future<Map<String, dynamic>> addTimeRecordToApi(
     },
     body: jsonEncode({
       'startTime': startTime.toIso8601String(),
-      'employeeId': userId,
+      'employeeToken': accessToken,
     }),
   );
 

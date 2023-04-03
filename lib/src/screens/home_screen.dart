@@ -12,6 +12,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../components/home_screen/widgets/start_message.dart';
 import '../components/home_screen/widgets/styled_timer.dart';
 import '../components/home_screen/widgets/toggle_action_button.dart';
+import 'package:fef_mobile_clock/src/components/custom_bottom_navigation_bar.dart';
+import 'package:fef_mobile_clock/src/components/custom_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   final NotificationHandlerController notificationController;
@@ -27,6 +29,13 @@ class HomeScreenState extends State<HomeScreen> {
   int _elapsedSeconds = 0;
   String timeId = '';
   bool isStarted = false;
+  int _currentIndex = 0;
+
+  void _onBottomNavigationTap(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   void initState() {
@@ -118,7 +127,8 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _handleTimeRecord(BuildContext context, String userId) async {
+  Future<void> _handleTimeRecord(
+      BuildContext context, String accessToken) async {
     final timestamp = DateTime.now();
 
     var connectivityResult = await Connectivity().checkConnectivity();
@@ -129,7 +139,7 @@ class HomeScreenState extends State<HomeScreen> {
       timeRecords.add(timestamp.toIso8601String());
       await prefs.setStringList('timeRecordsStart', timeRecords);
     } else {
-      final result = await addTimeRecordToApi(timestamp, userId);
+      final result = await addTimeRecordToApi(timestamp, accessToken);
       if (result['success']) {
         timeId = result['idTime'];
         if (!mounted) return;
@@ -160,14 +170,13 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = Provider.of<UserProvider>(context).userId;
+    final accessToken =
+        Provider.of<UserProvider>(context, listen: false).accessToken;
 
     String timerText = _formatDuration(Duration(seconds: _elapsedSeconds));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
+      appBar: const CustomAppBar(title: 'Contagem de tempo'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -179,7 +188,7 @@ class HomeScreenState extends State<HomeScreen> {
             ToggleActionButton(
               onPressed: (isStarted) {
                 if (isStarted) {
-                  _handleTimeRecord(context, userId!);
+                  _handleTimeRecord(context, accessToken!);
                 } else {
                   _stopTimer();
                 }
@@ -189,6 +198,8 @@ class HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: _currentIndex, onTap: _onBottomNavigationTap),
     );
   }
 }

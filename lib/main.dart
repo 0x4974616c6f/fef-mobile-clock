@@ -5,8 +5,11 @@ import 'package:timezone/data/latest.dart' as tz;
 
 import 'app.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
+  final userProvider = UserProvider();
+  await userProvider.init();
   runApp(
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
