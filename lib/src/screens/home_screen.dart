@@ -9,10 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-import '../components/home_screen/widgets/welcome_text.dart';
-import '../components/home_screen/widgets/counter_text.dart';
-import '../components/home_screen/widgets/register_button.dart';
-import '../components/home_screen/widgets/stop_button.dart';
+import '../components/home_screen/widgets/start_message.dart';
+import '../components/home_screen/widgets/styled_timer.dart';
+import '../components/home_screen/widgets/toggle_action_button.dart';
 
 class HomeScreen extends StatefulWidget {
   final NotificationHandlerController notificationController;
@@ -20,14 +19,14 @@ class HomeScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   int _elapsedSeconds = 0;
   String timeId = '';
+  bool isStarted = false;
 
   @override
   void initState() {
@@ -163,6 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final userId = Provider.of<UserProvider>(context).userId;
 
+    String timerText = _formatDuration(Duration(seconds: _elapsedSeconds));
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
@@ -171,16 +172,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const WelcomeText(),
+            const StartMessage(),
             const SizedBox(height: 30),
-            CounterText(counterValue: _elapsedSeconds),
+            StyledTimer(timerText: timerText),
             const SizedBox(height: 30),
-            RegisterButton(
-              onPressed: () => _handleTimeRecord(context, userId!),
-            ),
-            const SizedBox(height: 10),
-            StopButton(
-              onPressed: _stopTimer,
+            ToggleActionButton(
+              onPressed: (isStarted) {
+                if (isStarted) {
+                  _handleTimeRecord(context, userId!);
+                } else {
+                  _stopTimer();
+                }
+              },
             ),
             const SizedBox(height: 30),
           ],
