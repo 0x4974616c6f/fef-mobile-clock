@@ -1,24 +1,23 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:fef_mobile_clock/src/utils/location_utils.dart';
+import 'dart:convert';
 
-Future<void> takePicture() async {
+Future<String> fileToBase64(File file) async {
+  final bytes = await file.readAsBytes();
+  return base64Encode(bytes);
+}
+
+Future<String?> takePicture() async {
   final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.camera);
+  final pickedFile = await picker.pickImage(
+      source: ImageSource.camera, preferredCameraDevice: CameraDevice.front);
 
   if (pickedFile == null) {
-    print('Nenhuma imagem selecionada.');
-    return;
+    return null;
   }
 
   final File image = File(pickedFile.path);
-  print(image.path);
-
-  final position = await getCurrentLocation();
-  if (position != null) {
-    print('Latitude: ${position.latitude}, Longitude: ${position.longitude}');
-  } else {
-    print('Não foi possível obter a localização do usuário.');
-  }
-  // Você pode usar a variável 'image' para exibir a imagem no aplicativo ou fazer upload para um servidor.
+  final String base64Image = await fileToBase64(image);
+  return base64Image;
 }

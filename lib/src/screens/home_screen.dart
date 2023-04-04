@@ -8,7 +8,6 @@ import 'package:fef_mobile_clock/src/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-
 import '../components/home_screen/widgets/start_message.dart';
 import '../components/home_screen/widgets/styled_timer.dart';
 import '../components/home_screen/widgets/toggle_action_button.dart';
@@ -157,7 +156,9 @@ class HomeScreenState extends State<HomeScreen> {
     setState(() {
       _elapsedSeconds = 0;
     });
-    takePicture();
+    final data = await takePicture();
+    final location = await getCurrentLocation();
+    print(location);
     _startTimer();
   }
 
