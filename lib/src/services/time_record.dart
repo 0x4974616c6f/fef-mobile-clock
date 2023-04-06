@@ -1,18 +1,22 @@
 import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 const String apiUrl = 'http://10.0.2.2:5050/clock/time-records';
 
-Future<Map<String, dynamic>> addTimeRecordToApi(
-    DateTime startTime, String accessToken) async {
+Future<Map<String, dynamic>> addTimeRecordToApi(DateTime startTime,
+    String accessToken, String? picture, Position? location) async {
   final response = await http.post(
     Uri.parse('$apiUrl/init'),
     headers: {
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: jsonEncode({
-      'startTime': startTime.toIso8601String(),
       'employeeToken': accessToken,
+      'startTime': startTime.toIso8601String(),
+      'longitude': location?.longitude,
+      'latitude': location?.latitude,
+      'picture': picture,
     }),
   );
 
@@ -28,7 +32,7 @@ Future<Map<String, dynamic>> addTimeRecordToApi(
 }
 
 Future<Map<String, dynamic>> updateTimeRecordToApi(
-    DateTime endTime, String userId, String recordId) async {
+    DateTime endTime, String recordId) async {
   final response = await http.put(
     Uri.parse('$apiUrl/fineshed/$recordId'),
     headers: {

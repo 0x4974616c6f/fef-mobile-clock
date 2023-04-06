@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:fef_mobile_clock/src/classes/end_time_records.dart';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
 import 'package:fef_mobile_clock/src/services/time_record.dart';
 import 'package:fef_mobile_clock/src/utils/camera_utils.dart';
@@ -13,6 +15,7 @@ import '../components/home_screen/widgets/styled_timer.dart';
 import '../components/home_screen/widgets/toggle_action_button.dart';
 import 'package:fef_mobile_clock/src/components/custom_bottom_navigation_bar.dart';
 import 'package:fef_mobile_clock/src/components/custom_app_bar.dart';
+import 'package:fef_mobile_clock/src/classes/start_time_records.dart';
 
 class HomeScreen extends StatefulWidget {
   final NotificationHandlerController notificationController;
@@ -74,13 +77,14 @@ class HomeScreenState extends State<HomeScreen> {
 
     if (connectivityResult == ConnectivityResult.none) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> timeRecords = prefs.getStringList('timeRecordsEnd') ?? [];
-      timeRecords.add(timestamp.toIso8601String());
-      await prefs.setStringList('timeRecordsEnd', timeRecords);
+      List<String> timeRecordsEnd = prefs.getStringList('timeRecordsEnd') ?? [];
+      EndTimeRecords endTimeRecords =
+          EndTimeRecords(timestamp: timestamp, id: timeId);
+      timeRecordsEnd.add(jsonEncode(endTimeRecords.toJson()));
+      await prefs.setStringList('timeRecordsEnd', timeRecordsEnd);
     } else {
       if (!mounted) return;
-      final userId = Provider.of<UserProvider>(context, listen: false).userId;
-      final result = await updateTimeRecordToApi(timestamp, userId!, timeId);
+      final result = await updateTimeRecordToApi(timestamp, timeId);
       if (!mounted) return;
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,9 +92,12 @@ class HomeScreenState extends State<HomeScreen> {
         );
       } else {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        List<String> timeRecords = prefs.getStringList('timeRecordsEnd') ?? [];
-        timeRecords.add(timestamp.toIso8601String());
-        await prefs.setStringList('timeRecordsEnd', timeRecords);
+        List<String> timeRecordsEnd =
+            prefs.getStringList('timeRecordsEnd') ?? [];
+        EndTimeRecords endTimeRecords =
+            EndTimeRecords(timestamp: timestamp, id: timeId);
+        timeRecordsEnd.add(jsonEncode(endTimeRecords.toJson()));
+        await prefs.setStringList('timeRecordsEnd', timeRecordsEnd);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
@@ -103,42 +110,54 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _syncTimeRecordsWithApi(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> timeRecordsStart =
-        prefs.getStringList('timeRecordsStart') ?? [];
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // List<String> timeRecordsStart =
+    //     prefs.getStringList('timeRecordsStart') ?? [];
 
-    if (timeRecordsStart.isEmpty) {
-      return;
-    } else {
-      for (final timeRecordString in timeRecordsStart) {
-        DateTime timeRecord = DateTime.parse(timeRecordString);
-        if (!mounted) return;
-        final userId = Provider.of<UserProvider>(context, listen: false).userId;
-        final result = await addTimeRecordToApi(timeRecord, userId!);
+    // if (timeRecordsStart.isEmpty) {
+    //   return;
+    // } else {
+    //   for (final timeRecordString in timeRecordsStart) {
+    //     DateTime timeRecord = DateTime.parse(timeRecordString);
+    //     if (!mounted) return;
+    //     final userId = Provider.of<UserProvider>(context, listen: false).userId;
+    //     final result = await addTimeRecordToApi(timeRecord, userId!);
 
-        if (result['success']) {
-        } else {
-          return;
-        }
-      }
+    //     if (result['success']) {
+    //     } else {
+    //       return;
+    //     }
+    //   }
 
-      await prefs.setStringList('timeRecordsStart', []);
-    }
+    //   await prefs.setStringList('timeRecordsStart', []);
+    // }
   }
 
   Future<void> _handleTimeRecord(
       BuildContext context, String accessToken) async {
     final timestamp = DateTime.now();
+    final picture = await takePicture();
+    final location = await getCurrentLocation();
+    setState(() {
+      _elapsedSeconds = 0;
+    });
 
     var connectivityResult = await Connectivity().checkConnectivity();
 
     if (connectivityResult == ConnectivityResult.none) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> timeRecords = prefs.getStringList('timeRecordsStart') ?? [];
-      timeRecords.add(timestamp.toIso8601String());
-      await prefs.setStringList('timeRecordsStart', timeRecords);
+      List<String> startTimeRecordsStrings =
+          prefs.getStringList('timeRecordsStart') ?? [];
+      StartTimeRecords newRecord = StartTimeRecords(
+        picture: picture,
+        location: location,
+        timestamp: timestamp,
+      );
+      startTimeRecordsStrings.add(jsonEncode(newRecord.toJson()));
+      prefs.setStringList('timeRecordsStart', startTimeRecordsStrings);
     } else {
-      final result = await addTimeRecordToApi(timestamp, accessToken);
+      final result =
+          await addTimeRecordToApi(timestamp, accessToken, picture, location);
       if (result['success']) {
         timeId = result['idTime'];
         if (!mounted) return;
@@ -153,12 +172,6 @@ class HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    setState(() {
-      _elapsedSeconds = 0;
-    });
-    final data = await takePicture();
-    final location = await getCurrentLocation();
-    print(location);
     _startTimer();
   }
 
