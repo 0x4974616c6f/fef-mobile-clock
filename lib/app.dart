@@ -1,3 +1,5 @@
+import 'package:fef_mobile_clock/src/components/main_page_view.dart';
+import 'package:fef_mobile_clock/src/screens/config_screen.dart';
 import 'package:fef_mobile_clock/src/screens/home_screen.dart';
 import 'package:fef_mobile_clock/src/screens/login_screen.dart';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
@@ -44,9 +46,8 @@ class MyApp extends StatelessWidget {
         routes: {
           '/': (context) =>
               _buildInitialScreen(context, notificationController),
-          '/home': (context) => HomeScreen(
-                notificationController: notificationController,
-              )
+          '/home': (context) => MainPageView(),
+          '/config': (context) => ConfigScreen(),
         },
       ),
     );
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
           return const CircularProgressIndicator();
         } else {
           return snapshot.data == '/home'
-              ? HomeScreen(notificationController: notificationController)
+              ? MainPageView() // Mude para MainPageView aqui
               : const LoginPage();
         }
       },

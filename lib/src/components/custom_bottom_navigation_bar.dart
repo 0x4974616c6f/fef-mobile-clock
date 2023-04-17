@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:fef_mobile_clock/src/providers/user_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
 
   const CustomBottomNavigationBar(
-      {super.key, required this.currentIndex, required this.onTap});
+      {Key? key, required this.currentIndex, required this.onTap})
+      : super(key: key);
 
   @override
   CustomBottomNavigationBarState createState() =>
@@ -46,12 +46,23 @@ class CustomBottomNavigationBarState extends State<CustomBottomNavigationBar>
         context, '/', (Route<dynamic> route) => false);
   }
 
+  void _onItemTapped(int index) {
+    if (index == 1) {
+      Navigator.pushNamed(context, "/config");
+    } else if (index == 0) {
+      Navigator.pushNamed(context, "/home");
+    } else {
+      widget.onTap(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: _animation,
       child: BottomNavigationBar(
-        onTap: widget.onTap,
+        onTap: _onItemTapped,
+        currentIndex: widget.currentIndex,
         items: [
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           const BottomNavigationBarItem(

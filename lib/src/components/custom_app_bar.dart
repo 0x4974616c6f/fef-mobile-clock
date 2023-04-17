@@ -42,6 +42,7 @@ class CustomAppBarState extends State<CustomAppBar>
     return AnimatedBuilder(
       animation: _colorAnimation,
       builder: (context, child) => AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: _colorAnimation.value,
         title: Text(
           widget.title,
