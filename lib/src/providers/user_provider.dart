@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserProvider with ChangeNotifier {
+  final String? apiurl = dotenv.env['API_URL'];
   UserProvider() {
     init();
   }
@@ -24,7 +26,7 @@ class UserProvider with ChangeNotifier {
       return false;
     }
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:5050/mobile/auth/auth'),
+      Uri.parse('$apiurl/mobile/auth/auth'),
       body: jsonEncode(<String, String>{
         'accessToken': accessToken,
       }),

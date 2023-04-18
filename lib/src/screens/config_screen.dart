@@ -1,48 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:fef_mobile_clock/src/components/custom_bottom_navigation_bar.dart';
-import 'package:fef_mobile_clock/src/components/custom_app_bar.dart';
-import 'package:fef_mobile_clock/src/providers/user_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class ConfigScreen extends StatefulWidget {
+  const ConfigScreen({super.key});
+
   @override
-  _ConfigScreenState createState() => _ConfigScreenState();
+  ConfigScreenState createState() => ConfigScreenState();
 }
 
-class _ConfigScreenState extends State<ConfigScreen> {
-  int _currentIndex = 1;
-
-  void _onBottomNavigationTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
+class ConfigScreenState extends State<ConfigScreen> {
   @override
   Widget build(BuildContext context) {
+    String recaptchaHtml = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>reCAPTCHA Example</title>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+  <form id="recaptcha-form">
+    <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY" data-callback="recaptchaCallback"></div>
+  </form>
+  <script>
+    function recaptchaCallback() {
+      var response = grecaptcha.getResponse();
+      if (response) {
+        window.flutter_inappwebview.callHandler('onVerifiedSuccessfully', response);
+      }
+    }
+  </script>
+</body>
+</html>
+''';
+
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Configurações'),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Tela de Configuração',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                'Aqui você pode adicionar os componentes e opções de configuração do seu aplicativo.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-            ),
-          ],
-        ),
+      // ... appBar, body e bottomNavigationBar
+      body: WebView(
+        initialUrl: Uri.dataFromString(
+          recaptchaHtml,
+          mimeType: 'text/html',
+        ).toString(),
+        javascriptMode: JavascriptMode.unrestricted,
+        javascriptChannels: {
+          JavascriptChannel(
+            name: 'flutter_inappwebview',
+            onMessageReceived: (message) {
+            },
+          ),
+        },
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-          currentIndex: _currentIndex, onTap: _onBottomNavigationTap),
     );
   }
 }

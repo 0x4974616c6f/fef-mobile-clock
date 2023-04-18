@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:fef_mobile_clock/src/providers/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 Future<Map<String, dynamic>> loginUser(
     BuildContext context, String email, String password) async {
   final response = await http.post(
-    Uri.parse('http://10.0.2.2:5050/mobile/auth/login'),
+    Uri.parse('${dotenv.env['API_URL']}/mobile/auth/login'),
     body: jsonEncode(<String, String>{
       'email': email,
       'password': password,

@@ -4,14 +4,13 @@ import 'package:fef_mobile_clock/src/screens/home_screen.dart';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
 
 class MainPageView extends StatefulWidget {
-  MainPageView({Key? key}) : super(key: key);
+  const MainPageView({Key? key}) : super(key: key);
 
   @override
-  _MainPageViewState createState() => _MainPageViewState();
+  MainPageViewState createState() => MainPageViewState();
 }
 
-class _MainPageViewState extends State<MainPageView> {
-  int _selectedIndex = 0;
+class MainPageViewState extends State<MainPageView> {
   final _pageController = PageController(initialPage: 0);
   final notificationController = NotificationHandlerController();
 
@@ -23,7 +22,6 @@ class _MainPageViewState extends State<MainPageView> {
 
   void _onPageChanged(int index) {
     setState(() {
-      _selectedIndex = index;
     });
   }
 
@@ -36,7 +34,7 @@ class _MainPageViewState extends State<MainPageView> {
         onPageChanged: _onPageChanged,
         children: [
           HomeScreen(notificationController: notificationController),
-          ConfigScreen(),
+          const ConfigScreen(),
         ],
       ),
     );

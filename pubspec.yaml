@@ -54,6 +54,8 @@ dependencies:
   timezone: ^0.8.0
   geolocator: ^8.0.0
   permission_handler: ^10.2.0
+  webview_flutter: ^2.0.4
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +77,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  assets:
+    - .env.dev
+    - .env.prod
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
