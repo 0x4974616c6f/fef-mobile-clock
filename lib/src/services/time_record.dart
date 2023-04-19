@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
- String apiUrl = '${dotenv.env['API_URL']}/clock/time-records';
+String apiUrl = '${dotenv.env['API_URL']}/clock/time-records';
 
 Future<Map<String, dynamic>> addTimeRecordToApi(DateTime startTime,
     String accessToken, String? picture, Position? location) async {
