@@ -8,7 +8,7 @@ Future<Map<String, dynamic>> changePassword(
   String employeeToken, String password, String newPassword, String confirmNewPassword
 ) async {
   final response = await http.post(
-    Uri.parse('${apiUrl}auth/change-password'),
+    Uri.parse('${apiUrl}mobile/auth/change-password'),
     headers: {
       'Content-Type': 'application/json; charset=UTF-8',
     },
