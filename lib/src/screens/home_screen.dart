@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fef_mobile_clock/src/classes/end_time_records.dart';
 import 'package:fef_mobile_clock/src/components/notification_handler.dart';
+import 'package:fef_mobile_clock/src/providers/global_state_provider.dart';
 import 'package:fef_mobile_clock/src/services/time_record.dart';
 import 'package:fef_mobile_clock/src/utils/camera_utils.dart';
 import 'package:fef_mobile_clock/src/utils/location_utils.dart';
@@ -16,6 +17,7 @@ import '../components/home_screen/widgets/toggle_action_button.dart';
 import 'package:fef_mobile_clock/src/components/custom_bottom_navigation_bar.dart';
 import 'package:fef_mobile_clock/src/components/custom_app_bar.dart';
 import 'package:fef_mobile_clock/src/classes/start_time_records.dart';
+import 'package:fef_mobile_clock/src/utils/format_time_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   final NotificationHandlerController notificationController;
@@ -27,8 +29,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  Timer? _timer;
-  int _elapsedSeconds = 0;
   String timeId = '';
   bool isStarted = false;
   int _currentIndex = 0;
@@ -52,26 +52,23 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _elapsedSeconds++;
-      });
+  void _startTimer(GlobalState state) {
+    // String formattedTime = formatDuration(Duration(seconds: state.counter));
 
-      String formattedTime =
-          _formatDuration(Duration(seconds: _elapsedSeconds));
+    state.startTimer(onTimeUpdate: (formattedTime) {
       widget.notificationController.showTimeNotification(formattedTime);
     });
   }
 
-  void _stopTimer() async {
+  void _stopTimer(GlobalState state) async {
     final timestamp = DateTime.now();
 
-    _timer?.cancel();
+    state.stopTimer(
+        onTimeStop: () =>
+            widget.notificationController.cancelTimeNotification());
 
     var connectivityResult = await Connectivity().checkConnectivity();
 
@@ -104,9 +101,7 @@ class HomeScreenState extends State<HomeScreen> {
         );
       }
     }
-    setState(() {
-      _elapsedSeconds = 0;
-    });
+    state.resetTimer();
   }
 
   Future<void> _syncTimeRecordsWithApi(BuildContext context) async {
@@ -134,13 +129,12 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _handleTimeRecord(
-      BuildContext context, String accessToken) async {
+      BuildContext context, String accessToken, GlobalState state) async {
     final timestamp = DateTime.now();
     final picture = await takePicture();
     final location = await getCurrentLocation();
-    setState(() {
-      _elapsedSeconds = 0;
-    });
+
+    state.resetTimer();
 
     var connectivityResult = await Connectivity().checkConnectivity();
 
@@ -172,22 +166,16 @@ class HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    _startTimer();
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$twoDigitMinutes:$twoDigitSeconds';
+    _startTimer(state);
   }
 
   @override
   Widget build(BuildContext context) {
+    final globalState = context.watch<GlobalState>();
     final accessToken =
         Provider.of<UserProvider>(context, listen: false).accessToken;
 
-    String timerText = _formatDuration(Duration(seconds: _elapsedSeconds));
+    String timerText = formatDuration(Duration(seconds: globalState.counter));
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Contagem de tempo'),
@@ -202,9 +190,9 @@ class HomeScreenState extends State<HomeScreen> {
             ToggleActionButton(
               onPressed: (isStarted) {
                 if (isStarted) {
-                  _handleTimeRecord(context, accessToken!);
+                  _handleTimeRecord(context, accessToken!, globalState);
                 } else {
-                  _stopTimer();
+                  _stopTimer(globalState);
                 }
               },
             ),

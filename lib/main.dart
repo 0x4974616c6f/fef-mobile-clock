@@ -1,3 +1,4 @@
+import 'package:fef_mobile_clock/src/providers/global_state_provider.dart';
 import 'package:fef_mobile_clock/src/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,10 +15,11 @@ void main() async {
   tz.initializeTimeZones();
   final userProvider = UserProvider();
   await userProvider.init();
-  runApp(
+  runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
-      child: const MyApp(),
+      lazy: false,
     ),
-  );
+    ChangeNotifierProvider(create: (context) => GlobalState(), lazy: false)
+  ], child: const MyApp()));
 }
