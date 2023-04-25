@@ -1,4 +1,6 @@
+import 'package:fef_mobile_clock/src/providers/global_state_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ToggleActionButton extends StatefulWidget {
   final Function(bool) onPressed;
@@ -10,26 +12,26 @@ class ToggleActionButton extends StatefulWidget {
 }
 
 class ToggleActionButtonState extends State<ToggleActionButton> {
-  bool _isStarted = false;
-
   @override
   Widget build(BuildContext context) {
+    final globalState = Provider.of<GlobalState>(context);
+
     return ElevatedButton(
       onPressed: () {
         setState(() {
-          _isStarted = !_isStarted;
+          globalState.toggleIsStarted();
         });
-        widget.onPressed(_isStarted);
+        widget.onPressed(globalState.isStarted);
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: _isStarted ? Colors.red : Colors.green,
+        backgroundColor: globalState.isStarted ? Colors.red : Colors.green,
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
       ),
       child: Text(
-        _isStarted ? 'Finalizar contagem' : 'Começar',
+        globalState.isStarted ? 'Finalizar contagem' : 'Começar',
         style: const TextStyle(fontSize: 18),
       ),
     );

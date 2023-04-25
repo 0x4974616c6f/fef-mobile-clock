@@ -6,9 +6,17 @@ import 'package:flutter/foundation.dart';
 class GlobalState extends ChangeNotifier {
   int _counter = 0;
   Timer? _timer;
+  bool _isStarted;
 
+  GlobalState({bool isStarted = false}) : _isStarted = isStarted;
 
+  bool get isStarted => _isStarted;
   int get counter => _counter;
+
+  void toggleIsStarted() {
+    _isStarted = !_isStarted;
+    notifyListeners();
+  }
 
   void startTimer({Function(String)? onTimeUpdate}) {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
