@@ -7,7 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
 
-bool isInDevelopment = true;
+bool isInDevelopment = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
