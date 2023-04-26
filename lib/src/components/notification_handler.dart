@@ -73,7 +73,7 @@ class NotificationHandlerState extends State<NotificationHandler> {
         AndroidNotificationDetails(
       '1',
       'Ferrinox Clock',
-      'Ferrinox Clock',
+      // 'Ferrinox Clock',
     );
 
     const NotificationDetails notificationDetails = NotificationDetails(
