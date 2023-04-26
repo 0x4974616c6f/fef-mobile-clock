@@ -1,0 +1,32 @@
+name: Flutter Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v1
+      with:
+        channel: stable
+
+    - name: Build App Bundle
+      run: |
+        flutter pub get
+        flutter build appbundle --release
+
+    - name: Deploy to Play Store
+      uses: r0adkll/upload-google-play@v1
+      with:
+        service_account_json_key: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        track: internal
+        release_status: completed
+        packages_to_upload: build/app/outputs/bundle/release/*.aab
