@@ -29,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
+  final globalState = GlobalState();
   String timeId = '';
   bool isStarted = false;
   int _currentIndex = 0;
@@ -48,11 +49,15 @@ class HomeScreenState extends State<HomeScreen> {
         _syncTimeRecordsWithApi(context);
       }
     });
+    globalState.loadState();
   }
 
   @override
   void dispose() {
     super.dispose();
+    if (globalState.isStarted) {
+      globalState.saveState();
+    }
   }
 
   void _startTimer(GlobalState state) {
